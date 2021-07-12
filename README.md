@@ -1,5 +1,9 @@
 # The link station solution
 
+## Solution endpoint
+The solution is available at:
+https://fympzxe77h.execute-api.eu-west-1.amazonaws.com/v1
+
 ## Prerequisites
 - Postman, for testing purposes
 - Python 3.8 or higher
