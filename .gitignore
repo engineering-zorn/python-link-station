@@ -1,0 +1,15 @@
+# Generic
+*.zip
+*.exe
+
+# Intellij
+.idea/
+
+# Python
+*.pyc
+
+# Terraform
+*.hcl
+.terraform/
+*.tfstate*
+tfplan

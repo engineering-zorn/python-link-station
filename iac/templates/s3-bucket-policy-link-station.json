@@ -1,0 +1,40 @@
+{
+  "Version": "2008-10-17",
+  "Statement": [
+    {
+      "Sid": "Deny all",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::${bucket_name}",
+        "arn:aws:s3:::${bucket_name}/*"
+      ],
+      "Condition": {
+        "StringNotLike": {
+          "aws:userId": [
+            "${account_id}",
+            "${admin_id}",
+            "${pipeline_runner_id}:*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "Grant permissions",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::${account_id}:root",
+          "arn:aws:iam::${account_id}:user/${admin_name}",
+          "arn:aws:iam::${account_id}:role/${pipeline_runner_name}"
+        ]
+      },
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::${bucket_name}",
+        "arn:aws:s3:::${bucket_name}/*"
+      ]
+    }
+  ]
+}

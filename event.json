@@ -1,0 +1,27 @@
+{
+  "device": {
+    "coordinates": {
+      "x": 0,
+      "y": 0
+    }
+  },
+  "linkStations": [{
+    "coordinates": {
+      "x": 0,
+      "y": 0
+    },
+    "reach": 10
+  }, {
+    "coordinates": {
+      "x": 20,
+      "y": 20
+    },
+    "reach": 1
+  }, {
+    "coordinates": {
+      "x": 10,
+      "y": 0
+    },
+    "reach": 12
+  }]
+}

@@ -1,0 +1,84 @@
+stages:
+  - test
+  - deploy
+  - destroy
+
+build:
+  stage: test
+  tags:
+    - core
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /^CICD change/i
+      when: never
+    - when: always
+  allow_failure: false
+  before_script:
+    - export
+    # Fresh clone
+    - cd ../
+    - rm -rf $CI_PROJECT_TITLE/
+    - gitlab_at=`aws ssm get-parameters --names "/core/gitlab/access_token" --with-decryption --query "Parameters[*].Value" --output text`
+    - git clone https://oauth2:$gitlab_at@gitlab.com/$CI_PROJECT_PATH.git
+    - cd $CI_PROJECT_TITLE/
+  script:
+    - python src/tests/test_lambda_function.py
+    - python src/tests/test_validators.py
+  artifacts:
+    paths:
+      - ./
+
+deploy:
+  stage: deploy
+  tags:
+    - core
+  dependencies:
+    - build
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /^CICD change/i
+      when: never
+    - when: always
+  before_script:
+    - mkdir -p target/
+    - cd src/
+    - zip ../target/link-station-latest.zip ./*.py
+    - cd ../
+  script:
+    - cd iac/
+    - terraform init
+    - terraform plan -var-file=default.tfvars -out=tfplan
+    - terraform apply tfplan
+  after_script:
+    - git add .
+    - git commit -m "CICD change"
+    - git push origin HEAD:master
+    - cd ../
+    - rm -rf $CI_PROJECT_TITLE/
+
+destroy:
+  stage: destroy
+  tags:
+    - core
+  dependencies:
+    - deploy
+  rules:
+    - if: $CI_COMMIT_MESSAGE =~ /^CICD change/i
+      when: never
+    - when: manual
+  before_script:
+    - export
+    # Fresh clone
+    - cd ../
+    - rm -rf $CI_PROJECT_TITLE/
+    - gitlab_at=`aws ssm get-parameters --names "/core/gitlab/access_token" --with-decryption --query "Parameters[*].Value" --output text`
+    - git clone https://oauth2:$gitlab_at@gitlab.com/$CI_PROJECT_PATH.git
+    - cd $CI_PROJECT_TITLE/
+  script:
+    - cd iac/
+    - terraform init
+    - terraform destroy -var-file=default.tfvars --auto-approve
+  after_script:
+    - git add .
+    - git commit -m "CICD change"
+    - git push origin HEAD:master
+    - cd ../
+    - rm -rf $CI_PROJECT_TITLE/
